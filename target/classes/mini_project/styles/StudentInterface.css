@@ -1,0 +1,22 @@
+.root {
+    -fx-background-color: #E8F4FC;
+    -fx-font-size: 1.2em;
+
+}
+
+.tab-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #CCCCCC;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tab-button {
+    -fx-background-color: #D3D3D3;
+    -fx-text-fill: black;
+    -fx-background-radius: 5em;
+}
+
+.tab-button:selected {
+    -fx-background-color: #FFA500;
+    -fx-text-fill: white;
+}

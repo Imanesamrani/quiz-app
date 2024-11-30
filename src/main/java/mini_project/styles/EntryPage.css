@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+.root {
+    -fx-font-family: 'Outfit';
+}
+
+.title {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #000000;
+}
+
+.description {
+    -fx-font-size: 20px;
+    -fx-text-fill: #a7a19a;
+}
+
+.details {
+    -fx-font-size: 20px;
+    -fx-text-fill: #a7a19a;
+}
+
+.details-bold {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: black; /* Set text color to black */
+}
+
+.bubbly-button { 
+    -fx-font-family: 'Outfit', sans-serif;
+    -fx-font-size: 20px; /* Set font size to 20px */ 
+    -fx-font-weight: bold; -fx-pref-width: 200px; -fx-padding: 0.5em 1em; -fx-text-fill: white; /* Set text color to white */ 
+    -fx-background-color: #ffbc5e; /* Set background color to #ffbc5e */ 
+    -fx-border-radius: 30px; /* Make the button rounded */ 
+    -fx-background-radius: 30px; /* Make the button rounded */ 
+    -fx-cursor: hand; 
+    -fx-effect: dropshadow(gaussian, rgba(255, 183, 0, 0.993), 15, 0, 0, 0); 
+    -fx-transition: transform 0.1s ease-in-out, 
+    -fx-background-color 0.3s; 
+} 
+
+.bubbly-button:hover { 
+    -fx-background-color: #ffbc5e; /* Slightly darker on hover */ 
+    -fx-effect: dropshadow(gaussian, rgba(255, 183, 0, 0.993), 20, 0, 0, 0); 
+} 
+
+.bubbly-button:active { 
+    -fx-background-color: #e0a851; /* Even darker when pressed */ 
+    -fx-effect: dropshadow(gaussian, rgba(255, 183, 0, 0.993), 25, 0, 0, 0); 
+}
