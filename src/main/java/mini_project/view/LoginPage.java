@@ -122,7 +122,7 @@ public class LoginPage {
      passwordField.setText("");
      
      try {
-        quizController.start(new Stage()); // Lancer dans une nouvelle fenêtre
+        quizController.showQuizScreen(main, scene); // Lancer dans une nouvelle fenêtre
     } catch (Exception ex) {
         ex.printStackTrace();
     }

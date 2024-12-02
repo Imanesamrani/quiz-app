@@ -5,102 +5,102 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import mini_project.database.DatabaseConnection;
 import mini_project.model.TestCase;
 
 public class TestCaseController {
 
-    // Create
-    public static final void createTestCase(TestCase testCase) {
-        String sql = "INSERT INTO test_cases (quizId, input, output) VALUES (?,?,?)";
-        try (
-            
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-        ) {
-            
-            statement.setInt(1, testCase.getQuizId());
-            statement.setString(2, testCase.getInput());
-            statement.setString(3, testCase.getOutput());
-
-            // Execute the insert query
-            statement.executeUpdate();
-            System.out.println("Test case created successfully");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Failed to create test case");
-        }
-    }
-
     
-    public static final TestCase getTestCase(int quizId) {
-        String sql = "SELECT * FROM test_cases WHERE quizId = ?";
-        try (
-            // Establish database connection
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-        ) {
-            statement.setInt(1, quizId);
 
-            // Execute the select query
+  
+
+      public static List<TestCase> getTestCasesByQuizId(int quizId) {
+        String query = "SELECT * FROM test_cases WHERE quizId = ?";
+        List<TestCase> testCases = new ArrayList<>();
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, quizId);
             ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                // Return the found test case
-                return new TestCase(
+            while (resultSet.next()) {
+                TestCase testCase = new TestCase(
                     resultSet.getInt("id"),
                     resultSet.getInt("quizId"),
                     resultSet.getString("input"),
                     resultSet.getString("output")
                 );
+                testCases.add(testCase);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Failed to retrieve test case");
         }
-        return null; // Return null if not found
+        return testCases;
     }
-
-    // Update
-    public static final void updateTestCase(TestCase testCase) {
-        String sql = "UPDATE test_cases SET input = ?, output = ? WHERE quizId = ?";
-        try (
-            // Establish database connection
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-        ) {
-            // Set parameters for the SQL statement
-            statement.setString(1, testCase.getInput());
-            statement.setString(2, testCase.getOutput());
-            statement.setInt(3, testCase.getQuizId());
-
-            // Execute the update query
+    
+ 
+    
+    public static void updateTestCaseInDatabase(int id, String input, String output) throws SQLException {
+        String query = "UPDATE test_cases SET input = ?, output = ? WHERE id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            
+            statement.setString(1, input);  // Définit l'entrée
+            statement.setString(2, output); // Définit la sortie
+            statement.setInt(3, id);        // Définit l'ID du test case
+            
+            int rowsAffected = statement.executeUpdate();
+            
+            if (rowsAffected == 0) {
+                System.out.println("Aucune ligne n'a été mise à jour pour l'ID " + id);
+            } else {
+                System.out.println("Test case avec ID " + id + " mis à jour avec succès.");
+            }
+        }
+    }
+    
+    
+    public static void deleteTestCaseFromDatabase(int id) throws SQLException {
+        String query = "DELETE FROM test_cases WHERE id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
             statement.executeUpdate();
-            System.out.println("Test case updated successfully");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Failed to update test case");
         }
     }
-
-    // Delete
-    public static final void deleteTestCase(int quizId) {
-        String sql = "DELETE FROM test_cases WHERE quizId = ?";
-        try (
-            // Establish database connection
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-        ) {
-            // Set the quizId for deletion
-            statement.setInt(1, quizId);
-
-            // Execute the delete query
-            statement.executeUpdate();
-            System.out.println("Test case deleted successfully");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Failed to delete test case");
+    
+    // Méthode pour supprimer tous les test cases associés à un quiz
+public static void deleteTestCasesByQuizId(int quizId) throws SQLException {
+    String query = "DELETE FROM test_cases WHERE quizId = ?";
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement = connection.prepareStatement(query)) {
+        statement.setInt(1, quizId);
+        int rowsAffected = statement.executeUpdate();
+        if (rowsAffected > 0) {
+            System.out.println(rowsAffected + " test cases supprimés.");
+        } else {
+            System.out.println("Aucun test case trouvé pour ce quiz.");
         }
     }
+}
+
+ // Méthode pour ajouter un test case à la base de données
+ public static void addTestCaseToDatabase(int quizId, String input, String output) throws SQLException {
+    String insertTestCaseQuery = "INSERT INTO test_cases (quizId, input, output) VALUES (?, ?, ?)";
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(insertTestCaseQuery)) {
+        preparedStatement.setInt(1, quizId);
+        preparedStatement.setString(2, input);
+        preparedStatement.setString(3, output);
+        int rowsAffected = preparedStatement.executeUpdate();
+
+        // Vérifier si l'insertion a réussi
+        if (rowsAffected > 0) {
+            System.out.println("Test case ajouté avec succès !");
+        } else {
+            System.out.println("Échec de l'ajout du test case.");
+        }
+    }
+}
 }
