@@ -3,16 +3,15 @@ package mini_project.view.Professor;
 import java.sql.SQLException;
 
 import mini_project.controller.CreateQuizInterfaceController;
-import mini_project.controller.LoginController;
+
 import mini_project.controller.QuizController;
-import mini_project.model.Quiz;
-import mini_project.model.TestCase;
+
 import mini_project.model.User;
 import mini_project.view.LoginPage;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
+
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -29,10 +28,12 @@ public class CreateQuizInterface extends Application {
     private int lastQuizId = -1;
     private static User loggedInUser; // Stocker l'utilisateur connecté
     
+    @SuppressWarnings("static-access")
     public void setLoggedInUser(User user) {
         this.loggedInUser = user; // Définir l'utilisateur connecté
     }
 
+    @SuppressWarnings("static-access")
     @Override
     public void start(Stage stage) {
            // Maximiser la fenêtre dès l'ouverture de la scène principale

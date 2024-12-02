@@ -11,20 +11,16 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import mini_project.controller.QuizController;
-import mini_project.controller.TestCaseController;
-import mini_project.model.Quiz;
-import mini_project.model.TestCase;
+
 import mini_project.view.EntryPage;
 
-import java.sql.Date;
 
 public class Main extends Application{
 
     private StackPane content;
 
     @Override
-    public void start(Stage stage){
+    public void start(@SuppressWarnings("exports") Stage stage){
         // init content
         content = new StackPane();
         /*-------------------------------COMMUN STUFF BETWEEN ALL SCREENS ----------------------------------- */

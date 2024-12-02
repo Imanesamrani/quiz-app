@@ -1,18 +1,12 @@
 package mini_project.controller;
 
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+
 import mini_project.database.DatabaseConnection;
 import mini_project.model.TestCase;
 

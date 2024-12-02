@@ -7,7 +7,7 @@ import javafx.scene.control.RadioButton;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import mini_project.model.User;
-import mini_project.database.DatabaseConnection;
+
 
 public class RegisterController {
 

@@ -11,7 +11,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
@@ -126,6 +128,7 @@ public static void deleteQuizFromDatabase(int quizId) throws SQLException {
             while (resultSet.next()) {
                 String studentName = resultSet.getString("firstname") + " " + resultSet.getString("lastname");
                 studentList.add(studentName);  // Ajouter le nom complet à la liste
+               
             }
 
         } catch (SQLException e) {
@@ -385,4 +388,107 @@ public static void deleteTestCasesByQuizId(int quizId) throws SQLException {
     }
 }
     
+public static int getTotalStudents() {
+    int totalStudents = 0;
+    String query = "SELECT COUNT(*) AS total_students FROM users WHERE role = 'student'";
+    
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(query);
+         ResultSet resultSet = preparedStatement.executeQuery()) {
+         
+        if (resultSet.next()) {
+            totalStudents = resultSet.getInt("total_students");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return totalStudents;
+}
+
+public static int getTotalQuizzes() {
+    int totalQuizzes = 0;
+    String query = "SELECT COUNT(*) AS total_quizzes FROM quizzes";
+    
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(query);
+         ResultSet resultSet = preparedStatement.executeQuery()) {
+         
+        if (resultSet.next()) {
+            totalQuizzes = resultSet.getInt("total_quizzes");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return totalQuizzes;
+}
+
+public static double getAverageScore() {
+    double averageScore = 0.0;
+    String query = "SELECT AVG(score) AS average_score FROM submissions WHERE score IS NOT NULL";
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(query);
+         ResultSet resultSet = preparedStatement.executeQuery()) {
+
+        if (resultSet.next()) {
+            averageScore = resultSet.getDouble("average_score");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return averageScore;
+}
+
+public static Map<String, Integer> getQuizzesTaken() {
+    Map<String, Integer> quizzesTakenMap = new HashMap<>();
+    String query = "SELECT u.firstname, u.lastname, COUNT(s.id) AS quizzesTaken " +
+                   "FROM users u " +
+                   "LEFT JOIN submissions s ON u.id = s.userId " +
+                   "WHERE u.role = 'student' " +
+                   "GROUP BY u.id";
+
+    try (Connection connection = DatabaseConnection.getConnection(); 
+         Statement statement = connection.createStatement(); 
+         ResultSet resultSet = statement.executeQuery(query)) {
+
+        while (resultSet.next()) {
+            String name = resultSet.getString("firstname") + " " + resultSet.getString("lastname");
+            int quizzesTaken = resultSet.getInt("quizzesTaken");
+            quizzesTakenMap.put(name, quizzesTaken);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return quizzesTakenMap;
+}
+
+public static Map<String, Double> getAverageScoreByStudent() {
+    Map<String, Double> averageScoreMap = new HashMap<>();
+    String query = "SELECT u.firstname, u.lastname, AVG(s.score) AS averageScore " +
+                   "FROM users u " +
+                   "LEFT JOIN submissions s ON u.id = s.userId " +
+                   "WHERE u.role = 'student' AND s.score IS NOT NULL " +
+                   "GROUP BY u.id";
+
+    try (Connection connection = DatabaseConnection.getConnection(); 
+         Statement statement = connection.createStatement(); 
+         ResultSet resultSet = statement.executeQuery(query)) {
+
+        while (resultSet.next()) {
+            String name = resultSet.getString("firstname") + " " + resultSet.getString("lastname");
+            double averageScore = resultSet.getDouble("averageScore");
+            averageScoreMap.put(name, averageScore);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return averageScoreMap;
+}
+
+
 }

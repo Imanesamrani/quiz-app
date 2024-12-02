@@ -1,8 +1,11 @@
 package mini_project.view.Professor;
 
 import java.util.List;
+import java.util.Map;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,6 +14,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -22,7 +28,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import mini_project.controller.QuizController;
-
+import mini_project.database.DatabaseConnection;
 import mini_project.model.User;
 import mini_project.view.LoginPage;
 
@@ -151,6 +157,7 @@ Label welcomeLabel = new Label("Welcome back, M. " + lastName);
 
          // Partie dynamique : Remplace les boutons par un TabPane
 TabPane tabPane = new TabPane();
+
 tabPane.setStyle("-fx-tab-min-width: 100; -fx-tab-min-height: 30;");
 
 // Onglet Quizzes
@@ -166,20 +173,145 @@ quizzesTab.setContent(quizScrollPane);
 Tab statisticsTab = new Tab("Statistics");
 statisticsTab.setClosable(false);
 statisticsTab.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
+
+// Conteneur principal pour les statistiques
+VBox statisticsContent = new VBox(20);
+statisticsContent.setPadding(new Insets(20));
+statisticsContent.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: black; -fx-border-radius: 15; -fx-background-radius: 15;");
+
+// Conteneur horizontal pour les statistiques générales
+HBox generalStatsContainer = new HBox(20); // Espacement de 20 entre les éléments
+generalStatsContainer.setAlignment(Pos.CENTER);
+generalStatsContainer.setPadding(new Insets(10));
+
+// Style commun pour les boîtes de statistiques
+String statBoxStyle = "-fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 10; " +
+                      "-fx-background-color: #F0F0F0; -fx-padding: 15;";
+// Obtenir le nombre total d'étudiants depuis la base de données
+int totalStudents = QuizController.getTotalStudents();
+// Statistique : Total Students
+VBox totalStudentsBox = new VBox();
+totalStudentsBox.setAlignment(Pos.CENTER);
+totalStudentsBox.setStyle(statBoxStyle);
+Label totalStudentsLabel = new Label("Total Students");
+totalStudentsLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
+Label totalStudentsValue = new Label(String.valueOf(totalStudents));
+totalStudentsValue.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #0078D7;");
+totalStudentsBox.getChildren().addAll(totalStudentsLabel, totalStudentsValue);
+
+// Obtenir le nombre total de quizzes depuis la base de données
+int totalQuizzes = QuizController.getTotalQuizzes();
+// Statistique : Total Quizzes
+VBox totalQuizzesBox = new VBox();
+totalQuizzesBox.setAlignment(Pos.CENTER);
+totalQuizzesBox.setStyle(statBoxStyle);
+Label totalQuizzesLabel = new Label("Total Quizzes");
+totalQuizzesLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
+Label totalQuizzesValue = new Label(String.valueOf(totalQuizzes));
+totalQuizzesValue.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #0078D7;");
+totalQuizzesBox.getChildren().addAll(totalQuizzesLabel, totalQuizzesValue);
+
+// Obtenir le score moyen depuis la base de données
+double averageScore = QuizController.getAverageScore();
+// Statistique : Average Score
+VBox averageScoreBox = new VBox();
+averageScoreBox.setAlignment(Pos.CENTER);
+averageScoreBox.setStyle(statBoxStyle);
+Label averageScoreLabel = new Label("Average Score");
+averageScoreLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
+Label averageScoreValue = new Label(String.format("%.2f%%", averageScore));
+averageScoreValue.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #0078D7;");
+averageScoreBox.getChildren().addAll(averageScoreLabel, averageScoreValue);
+
+// Ajouter les boîtes au conteneur horizontal
+generalStatsContainer.getChildren().addAll(totalStudentsBox, totalQuizzesBox, averageScoreBox);
+
+// Ajouter le titre pour les meilleurs étudiants
+Label topStudentsTitle = new Label("Top Performing Students");
+topStudentsTitle.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-underline: true;");
+
+// Table pour les meilleurs étudiants
+TableView<Student> topStudentsTable = new TableView<>();
+topStudentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+topStudentsTable.setStyle("-fx-border-color: black; -fx-border-radius: 10;");
+
+// Colonne : Name
+TableColumn<Student, String> nameColumn = new TableColumn<>("Name");
+nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+nameColumn.setStyle("-fx-alignment: CENTER;");
+
+// Colonne : Average Score
+TableColumn<Student, String> scoreColumn = new TableColumn<>("Average Score");
+scoreColumn.setCellValueFactory(new PropertyValueFactory<>("averageScore"));
+scoreColumn.setStyle("-fx-alignment: CENTER;");
+
+// Colonne : Quizzes Taken
+TableColumn<Student, Integer> quizzesColumn = new TableColumn<>("Quizzes Taken");
+quizzesColumn.setCellValueFactory(new PropertyValueFactory<>("quizzesTaken"));
+quizzesColumn.setStyle("-fx-alignment: CENTER;");
+
+// Ajouter les colonnes à la table
+topStudentsTable.getColumns().addAll(nameColumn, scoreColumn, quizzesColumn);
+
+// Récupérer les listes nécessaires depuis la base de données
+List<String> studentNames = QuizController.getStudentList(); // Noms des étudiants
+Map<String, Integer> quizzesTakenMap = QuizController.getQuizzesTaken(); // Quizzes pris
+Map<String, Double> averageScoreMap = QuizController.getAverageScoreByStudent(); // Moyenne des scores
+
+// Créer une liste observable pour le tableau
+ObservableList<Student> studentsData = FXCollections.observableArrayList();
+
+// Remplir les données pour chaque étudiant
+for (String studentName : studentNames) {
+    int quizzesTaken = quizzesTakenMap.getOrDefault(studentName, 0);
+    double averageScore1 = averageScoreMap.getOrDefault(studentName, 0.0);
+    String formattedScore = String.format("%.2f%%", averageScore1); 
+    studentsData.add(new Student(studentName, formattedScore, quizzesTaken));
+}
+
+studentsData.sort((student1, student2) -> {
+
+    String score1 = student1.getAverageScore().replace("%", "").replace(",", ".");
+    String score2 = student2.getAverageScore().replace("%", "").replace(",", ".");
+
+    double numericScore1 = Double.parseDouble(score1);
+    double numericScore2 = Double.parseDouble(score2);
+
+   
+    return Double.compare(numericScore2, numericScore1);
+});
+
+
+// Ajouter les données au TableView
+topStudentsTable.setItems(studentsData);
+
+
+
+// Ajouter les éléments au conteneur principal des statistiques
+statisticsContent.getChildren().addAll(
+    generalStatsContainer,
+    topStudentsTitle,
+    topStudentsTable
+);
+
+// Ajouter le conteneur principal au ScrollPane
+ScrollPane statisticsScrollPane = new ScrollPane(statisticsContent);
+statisticsScrollPane.setFitToWidth(true);
+statisticsScrollPane.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: black; -fx-border-radius: 15;");
+statisticsTab.setContent(statisticsScrollPane);
+
 FlowPane statisticsPane = new FlowPane();
 statisticsPane.setPadding(new Insets(10));
 statisticsPane.setHgap(10);
 statisticsPane.setVgap(10);
-ScrollPane statisticsScrollPane = new ScrollPane(statisticsPane);
-statisticsScrollPane.setFitToWidth(true);
-statisticsScrollPane.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: black; -fx-border-radius: 15;");
-statisticsTab.setContent(statisticsScrollPane);
+
 
 // Ajouter les onglets au TabPane
 tabPane.getTabs().addAll(quizzesTab, statisticsTab);
 
 // Créer un VBox pour contenir le bouton Create et le TabPane
 VBox quizContentContainer = new VBox(10); // Espacement de 10 entre les éléments
+
 quizContentContainer.setPadding(new Insets(10)); // Ajout de marges internes
 
 // HBox pour aligner le bouton Create à droite
@@ -204,9 +336,8 @@ for (String quizTitle : quizzes) {
     // Set button text with "Quiz X" and title on separate lines
     String buttonText = "Quiz " + quizNumber + "\n" + quizTitle;
     Button tpButton = new Button(buttonText);
-    tpButton.setPrefSize(120, 80); // Adjust size as needed
-    tpButton.setStyle("-fx-background-color: #D9D9D9; -fx-text-fill: black; -fx-text-alignment: center; -fx-font-size: 16px;"
-            + "-fx-effect: dropshadow(gaussian, #EEFEFF, 10, 0.5, 0, 0);");
+    tpButton.setPrefSize(120, 80); 
+    tpButton.setStyle(statBoxStyle);
   
 
     // Ajouter un gestionnaire d'événements pour chaque bouton
@@ -229,6 +360,7 @@ for (String quizTitle : quizzes) {
 
         // Add everything to the quiz section
         quizSection.getChildren().addAll(quizButtonsBar, quizScrollPane);
+        
 
         // Right Section: Student List (25%)
         VBox studentSection = new VBox(20);
@@ -258,7 +390,10 @@ for (String quizTitle : quizzes) {
             studentList.getChildren().add(studentLabel);
         }
 
-        studentSection.getChildren().addAll(studentListTitle, studentList);
+        ScrollPane scrollPaneStudet = new ScrollPane(studentList);
+        //scrollPaneStudet.setFitToWidth(true); 
+        scrollPaneStudet.setStyle("-fx-background-color: white; -fx-border-color: white; -fx-border-radius: 5;-fx-background-radius: 5;"); 
+        studentSection.getChildren().addAll(studentListTitle, studentList,scrollPaneStudet);
 
 
         // Add both sections to the center layout
